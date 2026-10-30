@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Target Trace</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#14181d; --muted:#5d6b7a; --line:#e2e7ec;
+    --bar:#3c6e9f; --bar2:#6f9ec4; --accent:#b8562f; --panel:#f6f8fa;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#14181d; --fg:#e8edf2; --muted:#93a1b0; --line:#2a323b;
+           --bar:#6f9ec4; --bar2:#3c6e9f; --accent:#e08a5e; --panel:#1b2129; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       padding:40px 32px 56px}
+  .wrap{max-width:1100px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 4px;font-weight:600}
+  .sub{color:var(--muted);margin:0 0 28px;font-size:15px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  thead th{text-align:left;font-weight:600;font-size:11px;letter-spacing:.09em;
+           text-transform:uppercase;color:var(--muted);
+           padding:0 10px 9px;border-bottom:1px solid var(--line)}
+  tbody td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  .name{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;white-space:nowrap}
+  .d1{padding-left:22px} .d2{padding-left:44px}
+  .io{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:12px;color:var(--muted);white-space:nowrap}
+  .track{position:relative;height:18px;background:var(--panel);border-radius:3px;min-width:260px}
+  .bar{position:absolute;top:0;height:18px;border-radius:3px;background:var(--bar)}
+  .bar.child{background:var(--bar2)}
+  .ms{text-align:right;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:13px;white-space:nowrap;width:76px}
+  .ok{color:#2e7d52;font-size:12px;font-weight:600}
+  @media (prefers-color-scheme: dark){ .ok{color:#6cc08b} }
+  .legend{margin-top:34px;padding:20px 22px;background:var(--panel);
+          border-left:3px solid var(--accent);border-radius:0 5px 5px 0}
+  .legend h2{font-size:13px;letter-spacing:.09em;text-transform:uppercase;
+             color:var(--muted);margin:0 0 12px;font-weight:600}
+  .legend dl{margin:0;display:grid;grid-template-columns:150px 1fr;gap:9px 18px}
+  .legend dt{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+  .legend dd{margin:0;color:var(--muted);font-size:14px}
+  @media print{ body{padding:16px} .legend{break-inside:avoid} }
+  @media (max-width:720px){
+    body{padding:24px 16px}
+    .io{display:none} .legend dl{grid-template-columns:1fr;gap:3px 0}
+    .legend dt{margin-top:9px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Target trace &mdash; one order</h1>
+  <p class="sub">This is what <code>order_service.py</code> must produce. One row is a <strong>span</strong>. The whole picture is a <strong>trace</strong>.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Span name</th><th>Input</th><th>Output</th>
+        <th style="width:40%">Timeline</th><th class="ms">Duration</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="name">place_order</td>
+        <td class="io">user_id=4471, items=[&hellip;]</td>
+        <td class="io">"txn_4471_2297"</td>
+        <td><div class="track"><div class="bar" style="left:0%;width:100%"></div></div></td>
+        <td class="ms">333 ms</td><td class="ok">OK</td>
+      </tr>
+      <tr>
+        <td class="name d1">validate_cart</td>
+        <td class="io">items=[("A19",2),("B77",1)]</td>
+        <td class="io">2297.0</td>
+        <td><div class="track"><div class="bar child" style="left:0%;width:18.6%"></div></div></td>
+        <td class="ms">62 ms</td><td class="ok">OK</td>
+      </tr>
+      <tr>
+        <td class="name d2">check_inventory</td>
+        <td class="io">sku="A19", qty=2</td>
+        <td class="io">True</td>
+        <td><div class="track"><div class="bar child" style="left:0%;width:9.3%"></div></div></td>
+        <td class="ms">31 ms</td><td class="ok">OK</td>
+      </tr>
+      <tr>
+        <td class="name d2">check_inventory</td>
+        <td class="io">sku="B77", qty=1</td>
+        <td class="io">True</td>
+        <td><div class="track"><div class="bar child" style="left:9.3%;width:9.3%"></div></div></td>
+        <td class="ms">31 ms</td><td class="ok">OK</td>
+      </tr>
+      <tr>
+        <td class="name d1">charge_payment</td>
+        <td class="io">user_id=4471, amount=2297.0</td>
+        <td class="io">"txn_4471_2297"</td>
+        <td><div class="track"><div class="bar child" style="left:18.6%;width:60.1%"></div></div></td>
+        <td class="ms">200 ms</td><td class="ok">OK</td>
+      </tr>
+      <tr>
+        <td class="name d1">send_confirmation</td>
+        <td class="io">user_id=4471, txn_id="txn_&hellip;"</td>
+        <td class="io">True</td>
+        <td><div class="track"><div class="bar child" style="left:78.7%;width:21.0%"></div></div></td>
+        <td class="ms">70 ms</td><td class="ok">OK</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="legend">
+    <h2>What every row must carry</h2>
+    <dl>
+      <dt>name</dt>         <dd>Which function ran.</dd>
+      <dt>duration</dt>     <dd>How long it took, in milliseconds.</dd>
+      <dt>nesting</dt>      <dd>Which function called it. <code>check_inventory</code> is indented under <code>validate_cart</code> because <code>validate_cart</code> called it.</dd>
+      <dt>input</dt>        <dd>The arguments the function received.</dd>
+      <dt>output</dt>       <dd>The value the function returned.</dd>
+      <dt>status</dt>       <dd>Whether it finished normally or raised an exception.</dd>
+    </dl>
+  </div>
+
+</div>
+</body>
+</html>

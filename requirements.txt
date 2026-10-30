@@ -1,0 +1,8 @@
+# Arcs 1 to 9 need NOTHING. They use only the Python standard library.
+# The lines below are needed only from Arc 10 onwards.
+
+langfuse==5.0.4
+python-dotenv==1.0.1
+
+# Arc 12 only (the agent).
+openai==1.68.2
