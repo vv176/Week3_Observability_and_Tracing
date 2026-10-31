@@ -135,17 +135,31 @@ def self_time_ms(span):
 
 
 def show_self_time_problem():
-    """Teaching aid: the two formulas side by side."""
+    """Teaching aid: the two formulas side by side.
+
+    Columns 2 and 3 are the two different answers to "how much time did the
+    children take". They disagree whenever children overlap. Columns 4 and 5
+    show what that disagreement does to self-time.
+    """
     print(f"\n--- self-time: Arc 7 formula vs the corrected one ---")
-    print(f"{'span':<22} {'total':>9} {'sum of kids':>12} {'covered':>9} {'self':>9}")
+    print(f"{'span':<17}{'total':>10}{'sum of kids':>14}{'covered':>11}"
+          f"{'self (Arc 7)':>15}{'self (fixed)':>15}")
     for s in sorted(SPANS, key=lambda s: s["start"]):
         kids = _children(s["span_id"])
         if not kids:
             continue
-        print(f"{s['name']:<22} {s['duration_ms']:8.1f}ms "
-              f"{self_time_naive_ms(s):11.1f}ms "
-              f"{_union_ms([(c['start'], c['end']) for c in kids]):8.1f}ms "
-              f"{self_time_ms(s):8.1f}ms")
+        kid_sum = sum(c["duration_ms"] for c in kids)
+        covered = _union_ms([(c["start"], c["end"]) for c in kids])
+        print(f"{s['name']:<17}{s['duration_ms']:8.1f}ms{kid_sum:12.1f}ms"
+              f"{covered:9.1f}ms{self_time_naive_ms(s):13.1f}ms"
+              f"{self_time_ms(s):13.1f}ms")
+    print()
+    print("  sum of kids   every child's duration added up; overlapping children"
+          " counted twice")
+    print("  covered       wall-clock time the children actually occupied;"
+          " overlaps counted once")
+    print("  self (Arc 7)  = total - sum of kids   -> negative once children overlap")
+    print("  self (fixed)  = total - covered")
 
 
 def print_tree():
