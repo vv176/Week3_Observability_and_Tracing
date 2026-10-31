@@ -73,7 +73,12 @@ STALE_DRAFT = {
             "full refund of the amount paid.",
 }
 
-STALE_POLICIES = CURRENT_POLICIES + [STALE_DRAFT]
+# The draft is FIRST in the index. This matters: _rerank sorts by score and
+# Python's sort is stable, so when the stale draft and the real policy tie on
+# score - which happens whenever the query does not say "electronics" - the
+# earlier one wins. A stale document sitting above the current one in an index
+# is exactly the real-world failure we are demonstrating.
+STALE_POLICIES = [STALE_DRAFT] + CURRENT_POLICIES
 
 
 def days_since(d):

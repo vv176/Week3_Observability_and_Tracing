@@ -1,4 +1,4 @@
-"""Arc 12, step 2 - one extra document in the knowledge base.
+"""Arc 11, step 2 - one extra document in the knowledge base.
 
 A draft policy from 2025 was never approved and never deleted from the index.
 Nothing else changes. No code changes. No exception is raised.
@@ -7,8 +7,6 @@ Nothing else changes. No code changes. No exception is raised.
     python3 02_green_but_wrong.py --fake
 """
 import os
-
-from langfuse import propagate_attributes
 
 import _common
 import llm
@@ -30,9 +28,7 @@ def main():
         return
     model = llm.build_model("poisoned", fake=_common.fake_mode())
 
-    with propagate_attributes(user_id="C-4471", session_id="support-demo",
-                              tags=["arc12", "poisoned"]):
-        result = run_agent(_common.QUESTION, model)
+    result = run_agent(_common.QUESTION, model)
 
     _common.report(result, client)
     print("Every span in that trace succeeded. Read the answer again.")

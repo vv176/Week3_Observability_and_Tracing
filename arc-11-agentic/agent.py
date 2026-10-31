@@ -3,7 +3,7 @@
 This is the first program in the class whose number of steps is not decided by
 us. The model decides, at run time, how many tools to call before it answers.
 
-That single fact is why the loop must record WHY it stopped.
+That single fact is why the loop must report WHY it stopped.
 """
 import json
 
@@ -41,13 +41,8 @@ def run_agent(question, model, max_steps=MAX_STEPS):
             messages.append({"role": "tool", "tool_call_id": call["id"],
                              "name": name, "content": json.dumps(result, default=str)})
 
-    # The most important three lines in this file.
-    get_client().update_current_span(metadata={
-        "termination_reason": reason,       # answered | max_steps | empty_response
-        "steps_used": steps,
-        "max_steps": max_steps,
-        "tool_calls_made": tool_calls_made,
-    })
+    # The agent reports WHY it stopped. This goes to the caller, who prints it;
+    # it is not recorded on the span.
     return {"answer": answer, "termination_reason": reason,
             "steps": steps, "tool_calls": tool_calls_made,
             # Read it HERE, while this span is still open. Once run_agent

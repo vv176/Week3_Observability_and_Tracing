@@ -1,29 +1,26 @@
-"""Arc 10 - the same program, traced by Langfuse.
+"""Arc 9 - the same program, traced by Langfuse.
 
-_domain.py is BYTE FOR BYTE the file from Arc 9. Nothing in the business
+_domain.py is BYTE FOR BYTE the file from Arc 8. Nothing in the business
 logic changed. Our tracer.py is gone.
 
-Compare this file with arc-09/order_service.py. That is the whole arc.
+Compare this file with arc-08-async/order_service.py. That is the whole arc:
+
+    Arc 8:  place_order = build(tracer.trace)
+    Arc 9:  place_order = build(observe)
+
+One word.
 """
 import asyncio
 import os
 
 from dotenv import load_dotenv
-from langfuse import get_client, observe, propagate_attributes
+from langfuse import get_client, observe
 
 from _domain import build
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
-
-def set_attribute(key, value):
-    """Arc 9's set_attribute, implemented with Langfuse instead of our dict."""
-    get_client().update_current_span(metadata={key: value})
-
-
-#   Arc 9:  place_order = build(tracer.trace, tracer.set_attribute)
-#   Arc 10: the decorator is theirs instead of ours. Nothing else moved.
-place_order = build(observe, set_attribute)
+place_order = build(observe)
 
 
 @observe(name="checkout")
@@ -40,9 +37,7 @@ async def main():
         print("No Langfuse credentials. Copy ../.env.example to ../.env first.")
         return
 
-    # user_id and session_id attach to every span underneath, automatically.
-    with propagate_attributes(user_id="customer-4471", session_id="class-demo"):
-        txn, trace_id = await checkout(4471, [("A19", 2), ("B77", 1)])
+    txn, trace_id = await checkout(4471, [("A19", 2), ("B77", 1)])
 
     print(f"Order confirmed: {txn}")
     print(f"Trace id       : {trace_id}")

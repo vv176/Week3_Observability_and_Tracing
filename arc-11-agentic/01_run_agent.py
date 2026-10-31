@@ -1,10 +1,8 @@
-"""Arc 12, step 1 - the agent working correctly.
+"""Arc 11, step 1 - the agent working correctly.
 
     python3 01_run_agent.py            # real model, real trace
     python3 01_run_agent.py --fake     # offline replay, stage fallback
 """
-from langfuse import propagate_attributes
-
 import _common
 import llm
 import tools
@@ -20,9 +18,7 @@ def main():
         return
     model = llm.build_model("good", fake=_common.fake_mode())
 
-    with propagate_attributes(user_id="C-4471", session_id="support-demo",
-                              tags=["arc12", "healthy"]):
-        result = run_agent(_common.QUESTION, model)
+    result = run_agent(_common.QUESTION, model)
 
     _common.report(result, client)
 

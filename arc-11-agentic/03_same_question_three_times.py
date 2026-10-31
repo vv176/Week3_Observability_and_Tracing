@@ -1,4 +1,4 @@
-"""Arc 12, step 3 - the same question, three times.
+"""Arc 11, step 3 - the same question, three times.
 
 Nothing changes between the runs. Not the question, not the tools, not the
 knowledge base. Only the model is allowed to behave differently.
@@ -6,8 +6,6 @@ knowledge base. Only the model is allowed to behave differently.
     python3 03_same_question_three_times.py
 """
 import hashlib
-
-from langfuse import propagate_attributes
 
 import _common
 import llm
@@ -30,9 +28,7 @@ def main():
     rows = []
     for i in range(1, 4):
         model = llm.build_model("good", fake=_common.fake_mode())
-        with propagate_attributes(user_id="C-4471", session_id="support-demo",
-                                  tags=["arc12", f"repeat-{i}"]):
-            result = run_agent(_common.QUESTION, model)
+        result = run_agent(_common.QUESTION, model)
         tid = result["trace_id"]
         rows.append((i, result, tid))
         client.flush()

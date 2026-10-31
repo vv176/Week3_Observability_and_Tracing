@@ -1,18 +1,5 @@
-# Credentials. Never commit.
 .env
-.env.*
-!.env.example
-
-# Instructor notes and rendered teaching PDFs. Kept out of the public repo.
-TEACHING*
-**/TEACHING*
-*.pdf
-
-# Python
 __pycache__/
 *.pyc
 .venv/
 venv/
-
-# macOS
-.DS_Store

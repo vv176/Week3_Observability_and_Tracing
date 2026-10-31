@@ -15,7 +15,7 @@ Three things worth noticing while reading this file:
 """
 import os
 
-from langfuse import get_client, observe
+from langfuse import observe
 
 import world
 
@@ -29,10 +29,6 @@ RERANK_TOP_K = int(os.getenv("RERANK_TOP_K", "2"))
 def use_policy_set(policies):
     global _POLICIES
     _POLICIES = policies
-
-
-def _meta(**kw):
-    get_client().update_current_span(metadata=kw)
 
 
 # ------------------------------------------------------------------ retrieval
@@ -49,8 +45,6 @@ def _keyword_prefilter(query, limit=4):
             scored.append((score, doc))
     scored.sort(key=lambda p: p[0], reverse=True)
     out = [d for _, d in scored[:limit]]
-    _meta(query=query, candidates_considered=len(_POLICIES), returned=len(out),
-          returned_ids=[d["id"] for d in out])
     return out
 
 
@@ -66,11 +60,8 @@ def _rerank(query, candidates, top_k=None):
         return title_hits * 10 + body_hits
 
     ranked = sorted(candidates, key=score, reverse=True)[:top_k]
-    # The retriever CAN see each document's status. Look at this metadata in
-    # the trace, then look at what search_policies actually returns.
-    _meta(query=query,
-          kept=[f"{d['id']}({d.get('status')})" for d in ranked],
-          dropped=[d["id"] for d in candidates if d not in ranked])
+    # The retriever CAN see each document's status here. Compare that with what
+    # search_policies actually returns.
     return ranked
 
 
@@ -84,8 +75,6 @@ def search_policies(query):
     """
     candidates = _keyword_prefilter(query)
     top = _rerank(query, candidates)
-    _meta(query=query, returned_ids=[d["id"] for d in top],
-          returned_statuses=[d.get("status") for d in top])
     return [{"id": d["id"], "title": d["title"], "text": d["text"]} for d in top]
 
 
@@ -94,7 +83,6 @@ def search_policies(query):
 @observe(as_type="tool")
 def get_customer(customer_id):
     c = world.CUSTOMERS.get(customer_id)
-    _meta(customer_id=customer_id, found=bool(c))
     if not c:
         return {"error": f"no customer {customer_id}"}
     return {"customer_id": customer_id, **c}
@@ -104,7 +92,6 @@ def get_customer(customer_id):
 def get_order(order_id):
     """Look up an order. Note that this tool calls another tool."""
     o = world.ORDERS.get(order_id)
-    _meta(order_id=order_id, found=bool(o))
     if not o:
         return {"error": f"no order {order_id}"}
     customer = get_customer(o["customer_id"])          # <- tool calling a tool
@@ -124,7 +111,6 @@ def get_order(order_id):
 @observe(as_type="tool")
 def check_warranty(sku):
     w = world.WARRANTY.get(sku)
-    _meta(sku=sku, found=bool(w))
     if not w:
         return {"error": f"no warranty record for {sku}"}
     return {"sku": sku, "warranty_months": w["months"], "covers": w["covers"]}
@@ -137,8 +123,6 @@ def calculate_refund(order_id, reason):
     if "error" in order:
         return order
     policies = search_policies(f"refund window {reason} electronics")
-    _meta(order_id=order_id, reason=reason,
-          policies_used=[p["id"] for p in policies])
     return {
         "order_id": order_id,
         "amount_paid": order["paid"],
