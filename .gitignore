@@ -3,9 +3,10 @@
 .env.*
 !.env.example
 
-# Instructor notes. Kept out of the public repo.
-TEACHING.md
-**/TEACHING.md
+# Instructor notes and rendered teaching PDFs. Kept out of the public repo.
+TEACHING*
+**/TEACHING*
+*.pdf
 
 # Python
 __pycache__/
